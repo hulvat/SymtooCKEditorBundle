@@ -6,6 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
 /**
  * CKEditor type
@@ -15,6 +16,13 @@ use Symfony\Component\Form\FormInterface;
  */
 class CKEditorType extends AbstractType
 {
+    private $router;
+
+    public function __construct(Router $router)
+    {
+        $this->router = $router;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -22,21 +30,32 @@ class CKEditorType extends AbstractType
     {
         $builder
             ->setAttribute('toolbar', $options['toolbar'])
-            ->setAttribute('ui_color', $options['ui_color']);
+            ->setAttribute('ui_color', $options['ui_color'])
+            ->setAttribute('ui_skin', $options['ui_skin'])
+            ->setAttribute('browser', $options['browser'])
+            ->setAttribute('browser_image', $options['browser_image'])
+            ->setAttribute('browser_flash', $options['browser_flash'])
+        ;
+
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function buildView(FormView $view, FormInterface $form)
     {
-        // TODO: trigger an event, so other bundles will be able to add button to Toolbar 
+        $connector = $this->router->generate('symtoo_ckeditor_connector');
+        // TODO: trigger an event, so other bundles will be able to add button to Toolbar
         $view
             ->set('toolbar', $form->getAttribute('toolbar'))
             ->set('ui_color', $form->getAttribute('ui_color'))
-            ->set('pici', 'rici');
+            ->set('ui_skin', $form->getAttribute('ui_skin'))
+            ->set('browser', strtr($form->getAttribute('browser'), array('%connector%' => $connector)))
+            ->set('browser_flash', strtr($form->getAttribute('browser_flash'), array('%connector%' => $connector)))
+            ->set('browser_image', strtr($form->getAttribute('browser_image'), array('%connector%' => $connector)))
+        ;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -92,10 +111,14 @@ class CKEditorType extends AbstractType
                     'items' => array('Maximize', 'ShowBlocks','-','About')
                 )
             ),
-            'ui_color' => null
+            'ui_color'      => null,
+            'browser'       => 'bundles/symtoockeditor/filebrowser/browser.html?Type=File&Connector=%connector%',
+            'browser_image' => 'bundles/symtoockeditor/filebrowser/browser.html?Type=Image&Connector=%connector%',
+            'browser_flash' => 'bundles/symtoockeditor/filebrowser/browser.html?Type=Flash&Connector=%connector%',
+            'ui_skin'       => 'v2',
         );
     }
-    
+
     /**
      * Returns the allowed option values for each option (if any).
      *
@@ -107,7 +130,7 @@ class CKEditorType extends AbstractType
     {
         return array('required' => array(false));
     }
-    
+
     /**
      * {@inheritdoc}
      */

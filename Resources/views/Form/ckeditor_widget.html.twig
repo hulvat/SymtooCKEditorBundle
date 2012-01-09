@@ -5,7 +5,7 @@
     <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
     <script type="text/javascript" src="{{ asset('bundles/symtoockeditor/ckeditor.js') }}"></script>
     <script type="text/javascript">
-    	    
+
         CKEDITOR.replace("{{ id }}",{
             width: jQuery('#{{ id }}').width(),
             height: jQuery('#{{ id }}').height(),
@@ -13,7 +13,15 @@
             {% if ui_color is not null %}
                 uiColor: {{ ui_color }},
             {% endif %}
-            language: 'sk'
+            {% if ui_skin is not null %}
+                skin: '{{ ui_skin }}',
+            {% endif %}
+            language: 'sk',
+            entities: false,
+            entities_latin: false,
+            entities_processNumerical: true,
+            filebrowserBrowseUrl: '{{ asset(browser) | raw }}',
+            filebrowserImageBrowseUrl: '{{ asset(browser_image) | raw}}',
         });
     </script>
 {% endspaceless %}
